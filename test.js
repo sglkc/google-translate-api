@@ -1,3 +1,12 @@
+let axios;
+try {
+    axios = require('axios');
+} catch (err) {
+    if (fetch === undefined) {
+        throw new Error('Neither Fetch nor Axios are accessible!');
+    }
+}
+
 var test = require('ava');
 var languages = require('./languages.js');
 var translate = require('./index.js');
@@ -21,6 +30,17 @@ test('translate from auto to dutch', async t => {
     t.is(res.from.language.iso, 'en');
     t.false(res.from.text.autoCorrected);
 });
+
+if (axios) {
+    test('translate using axios if default fetch, and installed', async t => {
+        const res = await translate('translator', {from: 'en', to: 'nl', requestFunction: 'axios'});
+
+        t.is(res.text, 'vertaler');
+        t.false(res.from.language.didYouMean);
+        t.is(res.from.language.iso, 'en');
+        t.false(res.from.text.autoCorrected);
+    });
+}
 
 test('translate several sentences with spaces (#73)', async t => {
     const res = await translate(
@@ -125,6 +145,16 @@ test('try to translate to an unsupported language', async t => {
     }
 });
 
+test('try to translate with an unsupported request function', async t => {
+    try {
+        await translate('something', {from: 'en', to: 'es', requestFunction: 'test'});
+        t.fail();
+    } catch (err) {
+        t.is(err.code, 400);
+        t.is(err.message, 'test was not found');
+    }
+});
+
 test('translate from dutch to english using language names instead of codes', async t => {
     const res = await translate('iets', {from: 'dutch', to: 'english'});
 
@@ -151,20 +181,18 @@ test('translate via an external language from outside of the API', async t => {
     t.is(res.from.language.iso, 'en');
 });
 
-test('pass axios options', async t => {
-    let a = 0;
-    const axiosconfig = {
-        transformResponse: [
-            response => {
-                a++;
-                return response;
-            }
-        ]
+test('pass fetch init', async t => {
+    const abortController = new AbortController();
+    const fetchinit = {
+        signal: abortController.signal
     };
-    const res = await translate('vertaler', {}, axiosconfig);
-
-    t.is(res.text, 'translator');
-    t.is(a, 2);
+    try {
+        const translation = translate('vertaler', {}, fetchinit);
+        abortController.abort();
+        await translation;
+    } catch (err) {
+        t.is(err.name, 'AbortError');
+    }
 });
 
 test('test get zh code', t => {

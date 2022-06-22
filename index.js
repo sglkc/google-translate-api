@@ -1,5 +1,7 @@
-var axios = require('axios');
-
+let axios;
+try {
+    axios = require('axios');
+} catch (err) {}
 var languages = require('./languages');
 
 function extract(key, res) {
@@ -11,9 +13,9 @@ function extract(key, res) {
     return '';
 }
 
-function translate(text, opts, axiosconfig) {
+function translate(text, opts, requestOptions) {
     opts = opts || {};
-    axiosconfig = axiosconfig || {};
+    requestOptions = requestOptions || {};
     var e;
     [opts.from, opts.to].forEach(function (lang) {
         if (lang && !languages.isSupported(lang)) {
@@ -22,6 +24,36 @@ function translate(text, opts, axiosconfig) {
             e.message = 'The language \'' + lang + '\' is not supported';
         }
     });
+
+    let requestFunction;
+    opts.requestFunction = typeof opts.requestFunction === 'string' ? opts.requestFunction.toLowerCase() : opts.requestFunction;
+    if ((opts.requestFunction === 'fetch' || opts.requestFunction === undefined) && fetch !== undefined) {
+        requestFunction = function (url, requestOptions, body) {
+            const fetchinit = {
+                ...requestOptions,
+                headers: new Headers(requestOptions.headers),
+                credentials: requestOptions.credentials || 'omit',
+                body: body
+            };
+            return fetch(url, fetchinit).then(res => res.text());
+        };
+    } else if ((opts.requestFunction === 'axios' || opts.requestFunction === undefined) && axios !== undefined) {
+        requestFunction = function (url, requestOptions, body) {
+            const axiosconfig = {
+                ...requestOptions,
+                url: url,
+                data: body
+            };
+            return axios(axiosconfig).then(res => res.data);
+        };
+    } else if (typeof opts.requestFunction === 'string' || opts.requestFunction === undefined) {
+        e = new Error();
+        e.code = 400;
+        e.message = (opts.requestFunction || 'Axios and Fetch') + ' was not found';
+    } else {
+        requestFunction = opts.requestFunction;
+    }
+
     if (e) {
         return new Promise(function (resolve, reject) {
             reject(e);
@@ -38,20 +70,19 @@ function translate(text, opts, axiosconfig) {
 
     var url = 'https://translate.google.' + opts.tld;
 
-    axiosconfig.method = 'GET';
-    axiosconfig.url = url;
+    requestOptions.method = 'GET';
 
     // according to translate.google.com constant rpcids seems to have different values with different POST body format.
     // * MkEWBc - returns translation
     // * AVdN8 - return suggest
     // * exi25c - return some technical info
     var rpcids = 'MkEWBc';
-    return axios(axiosconfig).then(function (res) {
+    return requestFunction(url, requestOptions).then(function (res) {
         var data = {
             'rpcids': rpcids,
             'source-path': '/',
-            'f.sid': extract('FdrFJe', res.data),
-            'bl': extract('cfb2h', res.data),
+            'f.sid': extract('FdrFJe', res),
+            'bl': extract('cfb2h', res),
             'hl': 'en-US',
             'soc-app': 1,
             'soc-platform': 1,
@@ -64,16 +95,18 @@ function translate(text, opts, axiosconfig) {
     }).then(function (data) {
         // === format for freq below is only for rpcids = MkEWBc ===
         var freq = [[[rpcids, JSON.stringify([[text, opts.from, opts.to, opts.autoCorrect], [null]]), null, 'generic']]];
-        axiosconfig.data = 'f.req=' + encodeURIComponent(JSON.stringify(freq)) + '&';
+        const body = 'f.req=' + encodeURIComponent(JSON.stringify(freq)) + '&';
         const queryParams = new URLSearchParams(data);
 
-        axiosconfig.url = url + '/_/TranslateWebserverUi/data/batchexecute?' + queryParams.toString();
-        axiosconfig.method = 'POST';
-        axiosconfig.headers = axiosconfig.headers || {};
-        axiosconfig.headers['content-type'] = 'application/x-www-form-urlencoded;charset=UTF-8';
+        url = url + '/_/TranslateWebserverUi/data/batchexecute?' + queryParams.toString();
+        requestOptions.method = 'POST';
+        requestOptions.headers = {
+            ...requestOptions.headers,
+            'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+        };
 
-        return axios(axiosconfig).then(function (res) {
-            var json = res.data.slice(6);
+        return requestFunction(url, requestOptions, body).then(function (res) {
+            var json = res.slice(6);
             var length = '';
 
             var result = {
