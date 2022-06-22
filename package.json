@@ -63,7 +63,7 @@
       "no-undef": "warn"
     }
   },
-  "optionalDependencies": {
+  "peerDependencies": {
     "axios": "^0.27.2"
   }
 }
