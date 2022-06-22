@@ -17,7 +17,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [12, 14]
+        node-version: [16, 18]
 
     steps:
     - uses: actions/checkout@v1
@@ -26,7 +26,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - name: install deps
-      run: npm ci
+      run: npm install
 
     - name: run tests
       run: npm test
@@ -34,9 +34,3 @@ jobs:
     - name: Generate lcov report
       if: matrix.node-version == 14
       run: npx nyc report --reporter=lcov
-
-    - name: Run coveralls
-      uses: coverallsapp/github-action@master
-      if: matrix.node-version == 14
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
