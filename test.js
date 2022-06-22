@@ -195,7 +195,7 @@ test('pass fetch init', async t => {
             if (fetch) {
                 t.is(err.name, 'AbortError');
             }
-        } catch (err) {
+        } catch (_) {
             t.is(err.name, 'CanceledError');
         }
     }
