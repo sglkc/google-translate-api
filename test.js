@@ -191,9 +191,11 @@ test('pass fetch init', async t => {
         abortController.abort();
         await translation;
     } catch (err) {
-        if (fetch) {
-            t.is(err.name, 'AbortError');
-        } else {
+        try {
+            if (fetch) {
+                t.is(err.name, 'AbortError');
+            }
+        } catch (err) {
             t.is(err.name, 'CanceledError');
         }
     }

@@ -27,31 +27,45 @@ function translate(text, opts, requestOptions) {
 
     let requestFunction;
     opts.requestFunction = typeof opts.requestFunction === 'string' ? opts.requestFunction.toLowerCase() : opts.requestFunction;
-    if ((opts.requestFunction === 'fetch' || opts.requestFunction === undefined) && fetch !== undefined) {
-        requestFunction = function (url, requestOptions, body) {
-            const fetchinit = {
-                ...requestOptions,
-                headers: new Headers(requestOptions.headers),
-                credentials: requestOptions.credentials || 'omit',
-                body: body
-            };
-            return fetch(url, fetchinit).then(res => res.text());
-        };
-    } else if ((opts.requestFunction === 'axios' || opts.requestFunction === undefined) && axios !== undefined) {
-        requestFunction = function (url, requestOptions, body) {
-            const axiosconfig = {
-                ...requestOptions,
-                url: url,
-                data: body
-            };
-            return axios(axiosconfig).then(res => res.data);
-        };
-    } else if (typeof opts.requestFunction === 'string' || opts.requestFunction === undefined) {
-        e = new Error();
-        e.code = 400;
-        e.message = (opts.requestFunction || 'Axios and Fetch') + ' was not found';
-    } else {
-        requestFunction = opts.requestFunction;
+
+    switch (opts.requestFunction) {
+        case undefined:
+        case 'fetch':
+            try {
+                if (fetch) {
+                    requestFunction = function (url, requestOptions, body) {
+                        const fetchinit = {
+                            ...requestOptions,
+                            headers: new Headers(requestOptions.headers),
+                            credentials: requestOptions.credentials || 'omit',
+                            body: body
+                        };
+                        return fetch(url, fetchinit).then(res => res.text());
+                    };
+                    break;
+                }
+            } catch (err) {}
+        case 'axios':
+            if (axios) {
+                requestFunction = function (url, requestOptions, body) {
+                    const axiosconfig = {
+                        ...requestOptions,
+                        url: url,
+                        data: body
+                    };
+                    return axios(axiosconfig).then(res => res.data);
+                };
+                break;
+            }
+        default:
+            if (typeof opts.requestFunction === 'string') {
+                e = new Error();
+                e.code = 400;
+                e.message = (opts.requestFunction || 'axios and fetch') + ' was not found';
+            } else {
+                requestFunction = opts.requestFunction;
+            }
+
     }
 
     if (e) {

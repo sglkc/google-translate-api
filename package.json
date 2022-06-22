@@ -60,7 +60,8 @@
       "ecmaScript": 7
     },
     "rules": {
-      "no-undef": "warn"
+      "no-undef": "warn",
+      "no-fallthrough": "warn"
     }
   },
   "peerDependencies": {
