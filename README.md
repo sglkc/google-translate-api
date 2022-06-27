@@ -14,7 +14,7 @@ A **free** and **unlimited** API for Google Translate :dollar: :no_entry_sign: w
 - Wide compatibility through supporting Fetch, Axios, and custom request functions
 
 ## Why this fork?
-This fork of a fork [vitalets/google-translate-api](https://github.com/vitalets/google-translate-api) contains several improvements with the primary change being it is written to support various request methods instead of Got, allowing for greater compatibility outside of Node.js.  It also abandons the outdated `querystring`.
+This fork of the fork [vitalets/google-translate-api](https://github.com/vitalets/google-translate-api) contains several improvements with the primary change being it is written to support various request methods instead of Got, allowing for greater compatibility outside of Node.js.  It also abandons the outdated `querystring`.  Additionally, new languages are more frequently added, and if a new language is not yet in the languages.js list you can now bypass it with the `forceFrom` and `forceTo` options. 
 
 ## Install 
 
