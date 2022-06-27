@@ -10,6 +10,8 @@ declare namespace googleTranslateApi {
   export interface IOptions {
     from?: string;
     to?: string;
+    forceFrom?: boolean;
+    forceTo?: boolean;
     tld?: string;
     autoCorrect?: boolean;
     requestFunction?: fuction | string;

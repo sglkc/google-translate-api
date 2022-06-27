@@ -68,7 +68,7 @@ translate('translator', {to: 'sr-Latn'}).then(res => ...);
 
 ## Proxy
 Google Translate has request limits. If too many requests are made, you can either end up with a 429 or a 503 error.
-You can use **proxy** to bypass them:
+You can use **proxy** to bypass them, however the default `requestFunction` of `fetch` does not support it:
 ```js
 const tunnel = require('tunnel');
 translate('Ik spreek Engels', {to: 'en'}, {
@@ -113,6 +113,16 @@ The `text` language. Must be `auto` or one of the codes/names (not case sensitiv
 Type: `string` Default: `en`
 
 The language in which the text should be translated. Must be one of the codes/names (case sensitive!) contained in [languages.js](https://github.com/vitalets/google-translate-api/blob/master/languages.js).
+
+##### forceFrom
+Type: `boolean` Default: `false`
+
+Forces the translate function to use the `from` option as the iso code, without checking the languages list.
+
+##### forceTo
+Type: `boolean` Default: `false`
+
+Forces the translate function to use the `to` option as the iso code, without checking the languages list.
 
 ##### raw
 Type: `boolean` Default: `false`

@@ -264,3 +264,15 @@ test('autoCorrect', async t => {
 
     t.is(res.text, 'Ik spreek Nederlands!');
 });
+
+test('force to language not listed', async t => {
+    languages['ja'] = undefined;
+    const res = await translate('dog', {from: 'en', to: 'ja', forceTo: true});
+    t.is(res.text, '犬');
+});
+
+test('force from language not listed', async t => {
+    languages['ja'] = undefined;
+    const res = await translate('犬', {from: 'ja', to: 'en', forceFrom: true});
+    t.is(res.text, 'dog');
+});

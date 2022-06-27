@@ -61,7 +61,8 @@
     },
     "rules": {
       "no-undef": "warn",
-      "no-fallthrough": "warn"
+      "no-fallthrough": "warn",
+      "dot-notation": "off"
     }
   },
   "peerDependencies": {
