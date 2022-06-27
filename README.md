@@ -88,7 +88,7 @@ translate('Ik spreek Engels', {to: 'en'}, {
 ```
 
 ## Does it work from web page context?
-It can, sort of. `https://translate.google.com` does not provide [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) http headers allowing access from other domains.  However, this fork is written using Fetch, allowing contexts that don't request CORS access, such as a browser extension background script or React Native.
+It can, sort of. `https://translate.google.com` does not provide [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) http headers allowing access from other domains.  However, this fork is written using Fetch and/or Axios, allowing contexts that don't request CORS access, such as a browser extension background script or React Native.
 
 ## API
 
@@ -98,7 +98,7 @@ It can, sort of. `https://translate.google.com` does not provide [CORS](https://
 
 Type: `string`
 
-The text to be translated
+The text to be translated.
 
 #### options
 
@@ -107,7 +107,7 @@ Type: `object`
 ##### from
 Type: `string` Default: `auto`
 
-The `text` language. Must be `auto` or one of the codes/names (not case sensitive) contained in [languages.js](https://github.com/vitalets/google-translate-api/blob/master/languages.js)
+The `text` language. Must be `auto` or one of the codes/names (not case sensitive) contained in [languages.js](https://github.com/vitalets/google-translate-api/blob/master/languages.js).
 
 ##### to
 Type: `string` Default: `en`
