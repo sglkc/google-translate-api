@@ -31,20 +31,24 @@ function translate(text, opts, requestOptions) {
     switch (opts.requestFunction) {
         case undefined:
         case 'fetch':
-            try {
-                if (fetch) {
-                    requestFunction = function (url, requestOptions, body) {
-                        const fetchinit = {
-                            ...requestOptions,
-                            headers: new Headers(requestOptions.headers),
-                            credentials: requestOptions.credentials || 'omit',
-                            body: body
-                        };
-                        return fetch(url, fetchinit).then(res => res.text());
+            if (typeof fetch !== 'undefined') {
+                requestFunction = function (url, requestOptions, body) {
+                    const fetchinit = {
+                        ...requestOptions,
+                        headers: new Headers(requestOptions.headers),
+                        credentials: requestOptions.credentials || 'omit',
+                        body: body
                     };
-                    break;
-                }
-            } catch (err) {}
+                    return fetch(url, fetchinit).then(res => res.text());
+                };
+                break;
+            }
+            if (opts.requestFunction === 'fetch') {
+                e = new Error();
+                e.code = 400;
+                e.message = 'fetch was not found';
+                break;
+            }
         case 'axios':
             if (axios) {
                 requestFunction = function (url, requestOptions, body) {
@@ -55,6 +59,12 @@ function translate(text, opts, requestOptions) {
                     };
                     return axios(axiosconfig).then(res => res.data);
                 };
+                break;
+            }
+            if (opts.requestFunction === 'axios') {
+                e = new Error();
+                e.code = 400;
+                e.message = 'axios was not found';
                 break;
             }
         default:
