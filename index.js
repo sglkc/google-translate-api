@@ -13,9 +13,10 @@ function extract(key, res) {
     return '';
 }
 
-function translate(text, opts, requestOptions) {
+function translate(input, opts, requestOptions) {
     opts = opts || {};
     requestOptions = requestOptions || {};
+
     var e;
     [[opts.from, opts.forceFrom], [opts.to, opts.forceTo]].forEach(function ([lang, force]) {
         if (!force && lang && !languages.isSupported(lang)) {
@@ -118,8 +119,6 @@ function translate(text, opts, requestOptions) {
         return data;
     }).then(function (data) {
         // === format for freq below is only for rpcids = MkEWBc ===
-        var freq = [[[rpcids, JSON.stringify([[text, opts.from, opts.to, opts.autoCorrect], [null]]), null, 'generic']]];
-        const body = 'f.req=' + encodeURIComponent(JSON.stringify(freq)) + '&';
         const queryParams = new URLSearchParams(data);
 
         url = url + '/_/TranslateWebserverUi/data/batchexecute?' + queryParams.toString();
@@ -129,87 +128,111 @@ function translate(text, opts, requestOptions) {
             'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
         };
 
-        return requestFunction(url, requestOptions, body).then(function (res) {
-            var json = res.slice(6);
-            var length = '';
+        const textArray = Array.isArray(input) ? input : (typeof input === 'object' ? Object.values(input) : [input]);
 
-            var result = {
-                text: '',
-                pronunciation: '',
-                from: {
-                    language: {
-                        didYouMean: false,
-                        iso: ''
-                    },
-                    text: {
-                        autoCorrected: false,
-                        value: '',
-                        didYouMean: false
+        const textRequests = [];
+
+        for (const text of textArray) {
+            const freq = [[[rpcids, JSON.stringify([[text, opts.from, opts.to, opts.autoCorrect], [null]]), null, 'generic']]];
+            const body = 'f.req=' + encodeURIComponent(JSON.stringify(freq)) + '&';
+
+            textRequests.push(
+                requestFunction(url, requestOptions, body).then(function (res) {
+                    var json = res.slice(6);
+                    var length = '';
+
+                    var result = {
+                        text: '',
+                        pronunciation: '',
+                        from: {
+                            language: {
+                                didYouMean: false,
+                                iso: ''
+                            },
+                            text: {
+                                autoCorrected: false,
+                                value: '',
+                                didYouMean: false
+                            }
+                        },
+                        raw: ''
+                    };
+
+                    try {
+                        length = /^\d+/.exec(json)[0];
+                        json = JSON.parse(json.slice(length.length, parseInt(length, 10) + length.length));
+                        json = JSON.parse(json[0][2]);
+                        result.raw = json;
+                    } catch (e) {
+                        return result;
                     }
-                },
-                raw: ''
-            };
 
-            try {
-                length = /^\d+/.exec(json)[0];
-                json = JSON.parse(json.slice(length.length, parseInt(length, 10) + length.length));
-                json = JSON.parse(json[0][2]);
-                result.raw = json;
-            } catch (e) {
+                    if (json[1][0][0][5] === undefined || json[1][0][0][5] === null) {
+                        // translation not found, could be a hyperlink or gender-specific translation?
+                        result.text = json[1][0][0][0];
+                    } else {
+                        result.text = json[1][0][0][5]
+                            .map(function (obj) {
+                                return obj[0];
+                            })
+                            .filter(Boolean)
+                            // Google api seems to split text per sentences by <dot><space>
+                            // So we join text back with spaces.
+                            // See: https://github.com/vitalets/google-translate-api/issues/73
+                            .join(' ');
+                    }
+                    result.pronunciation = json[1][0][0][1];
+
+                    // From language
+                    if (json[0] && json[0][1] && json[0][1][1]) {
+                        result.from.language.didYouMean = true;
+                        result.from.language.iso = json[0][1][1][0];
+                    } else if (json[1][3] === 'auto') {
+                        result.from.language.iso = json[2];
+                    } else {
+                        result.from.language.iso = json[1][3];
+                    }
+
+                    // Did you mean & autocorrect
+                    if (json[0] && json[0][1] && json[0][1][0]) {
+                        var str = json[0][1][0][0][1];
+
+                        str = str.replace(/<b>(<i>)?/g, '[');
+                        str = str.replace(/(<\/i>)?<\/b>/g, ']');
+
+                        result.from.text.value = str;
+
+                        if (json[0][1][0][2] === 1) {
+                            result.from.text.autoCorrected = true;
+                        } else {
+                            result.from.text.didYouMean = true;
+                        }
+                    }
+
+                    return result;
+                }).catch(function (err) {
+                    err.message += `\nUrl: ${url}`;
+                    if (err.statusCode !== undefined && err.statusCode !== 200) {
+                        err.code = 'BAD_REQUEST';
+                    } else {
+                        err.code = 'BAD_NETWORK';
+                    }
+                    throw err;
+                })
+            );
+        }
+
+        return Promise.all(textRequests).then(textResponses => {
+            if (Array.isArray(input)) {
+                return textResponses;
+            } else if (typeof input === 'object') {
+                const result = {};
+                Object.keys(input).forEach((key, index) => {
+                    result[key] = textResponses[index];
+                });
                 return result;
             }
-
-            if (json[1][0][0][5] === undefined || json[1][0][0][5] === null) {
-                // translation not found, could be a hyperlink or gender-specific translation?
-                result.text = json[1][0][0][0];
-            } else {
-                result.text = json[1][0][0][5]
-                    .map(function (obj) {
-                        return obj[0];
-                    })
-                    .filter(Boolean)
-                    // Google api seems to split text per sentences by <dot><space>
-                    // So we join text back with spaces.
-                    // See: https://github.com/vitalets/google-translate-api/issues/73
-                    .join(' ');
-            }
-            result.pronunciation = json[1][0][0][1];
-
-            // From language
-            if (json[0] && json[0][1] && json[0][1][1]) {
-                result.from.language.didYouMean = true;
-                result.from.language.iso = json[0][1][1][0];
-            } else if (json[1][3] === 'auto') {
-                result.from.language.iso = json[2];
-            } else {
-                result.from.language.iso = json[1][3];
-            }
-
-            // Did you mean & autocorrect
-            if (json[0] && json[0][1] && json[0][1][0]) {
-                var str = json[0][1][0][0][1];
-
-                str = str.replace(/<b>(<i>)?/g, '[');
-                str = str.replace(/(<\/i>)?<\/b>/g, ']');
-
-                result.from.text.value = str;
-
-                if (json[0][1][0][2] === 1) {
-                    result.from.text.autoCorrected = true;
-                } else {
-                    result.from.text.didYouMean = true;
-                }
-            }
-
-            return result;
-        }).catch(function (err) {
-            err.message += `\nUrl: ${url}`;
-            if (err.statusCode !== undefined && err.statusCode !== 200) {
-                err.code = 'BAD_REQUEST';
-            } else {
-                err.code = 'BAD_NETWORK';
-            }
-            throw err;
+            return textResponses[0];
         });
     });
 }

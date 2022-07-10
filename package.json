@@ -61,8 +61,9 @@
     },
     "rules": {
       "no-undef": "warn",
-      "no-fallthrough": "warn",
-      "dot-notation": "off"
+      "no-fallthrough": "off",
+      "dot-notation": "off",
+      "no-loop-func": "warn"
     }
   },
   "peerDependencies": {

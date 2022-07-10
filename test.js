@@ -23,7 +23,7 @@ test('translate without any options', async t => {
 });
 
 test('translate from auto to dutch', async t => {
-    const res = await translate('translator', {from: 'en', to: 'nl'});
+    const res = await translate('translator', {from: 'auto', to: 'nl'});
 
     t.is(res.text, 'vertaler');
     t.false(res.from.language.didYouMean);
@@ -275,4 +275,28 @@ test('force from language not listed', async t => {
     languages['ja'] = undefined;
     const res = await translate('犬', {from: 'ja', to: 'en', forceFrom: true});
     t.is(res.text, 'dog');
+});
+
+test('array input and output', async t => {
+    const res = await translate(['dog', 'cat'], {from: 'en', to: 'es'});
+
+    t.is(res.length, 2);
+    t.is(res[0].text, 'perra');
+    t.is(res[1].text, 'gata');
+});
+
+test('array input in auto from different languages', async t => {
+    const res = await translate(['perro', '犬', 'كلب'], {from: 'auto', to: 'en'});
+
+    t.is(res.length, 3);
+    t.is(res[0].text, 'dog');
+    t.is(res[1].text, 'dog');
+    t.is(res[2].text, 'dog');
+});
+
+test('object input and output', async t => {
+    const res = await translate({dog: 'dog', cat: 'cat'}, {from: 'en', to: 'es'});
+
+    t.is(res.dog.text, 'perra');
+    t.is(res.cat.text, 'gata');
 });

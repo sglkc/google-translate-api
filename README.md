@@ -66,6 +66,52 @@ translate.languages['sr-Latn'] = 'Serbian Latin';
 translate('translator', {to: 'sr-Latn'}).then(res => ...);
 ```
 
+### Array and Object inputs
+An array or object of inputs can be used to slightly lower the number of individual API calls:
+
+```js
+const inputArray = [
+  'I speak Dutch!',
+  'Dutch is fun!',
+  'And so is translating!'
+];
+
+const res = await translate(inputArray, { from: 'en', to: 'nl' });
+
+console.log(res[0].text); // => 'Ik spreek Nederlands!'
+console.log(res[1].text); // => 'Nederlands is leuk!'
+console.log(res[2].text); // => 'En zo ook vertalen!'
+```
+
+and similarly with an object:
+
+```js
+const inputObject = {
+  name: 'Aidan Welch',
+  fact: 'I\'m maintaining this project',
+  birthMonth: 'February'
+};
+
+const res = await translate(inputObject, { from: 'en', to: 'ja' });
+
+console.log(res.name.text); // => 'エイダンウェルチ'
+console.log(res.fact.text); // => '私はこのプロジェクトを維持しています'
+console.log(res.birthMonth.text); // => '2月'
+```
+
+If you use `auto` each input can even be in a different language!
+
+### Using languages not supported in languages.js yet
+If you know the ISO code used by Google Translate for a language and know it is supported but this API doesn't support it yet you can force it like so:
+
+```js
+const res = await translate('Hello!', { from: 'en', to: 'as', forceTo: true });
+
+console.log(res.text); // => 'নমস্কাৰ!'
+```
+
+`forceFrom` can be used in the same way.
+
 ## Proxy
 Google Translate has request limits. If too many requests are made, you can either end up with a 429 or a 503 error.
 You can use **proxy** to bypass them, however the default `requestFunction` of `fetch` does not support it:
@@ -94,9 +140,9 @@ It can, sort of. `https://translate.google.com` does not provide [CORS](https://
 
 ### translate(text, [options], [requestOptions])
 
-#### text
+#### input
 
-Type: `string`
+Type: `string` | `string[]` | `{[key]: string}`
 
 The text to be translated.
 
@@ -153,7 +199,8 @@ Type: `object`
 
 The options used by the requestFunction.  The [fetchinit](https://developer.mozilla.org/en-US/docs/Web/API/fetch) and [axiosconfig](https://axios-http.com/docs/req_config) are the default used.  requestOptions.headers is automatically converted to the `Header` class for fetchinit.
 
-### Returns an `object`:
+### Returns an `object` | `object[]` | `{[key]: object}`}:
+Matches the structure of the input, so returns just the individual object if just a string is input, an array if an array is input, object with the same keys if an object is input.  Regardless of that, each returned value will have this schema:
 - `text` *(string)* – The translated text.
 - `from` *(object)*
   - `language` *(object)*
