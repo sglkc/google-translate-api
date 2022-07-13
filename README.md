@@ -28,6 +28,8 @@ From automatic language detection to English:
 
 ```js
 const translate = require('google-translate-api-x');
+// Or of course
+import translate from 'google-translate-api-x';
 
 const res = await translate('Ik spreek Engels', {to: 'en'});
 
