@@ -63,7 +63,8 @@
       "no-undef": "warn",
       "no-fallthrough": "off",
       "dot-notation": "off",
-      "no-loop-func": "warn"
+      "no-loop-func": "warn",
+      "no-dupe-keys": "warn"
     }
   },
   "peerDependencies": {

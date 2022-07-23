@@ -7,6 +7,7 @@ A **free** and **unlimited** API for Google Translate :dollar: :no_entry_sign: w
 
 ## Features 
 
+- Up-to-Date with all new Google Translate supported languages!
 - Auto language detection
 - Spelling correction
 - Language correction 
@@ -229,6 +230,7 @@ Otherwise, it will be an empty `string` (`''`).
 
 ## Related projects
 * [Translateer](https://github.com/Songkeys/Translateer) - uses Puppeteer to access Google Translate API.
+* [google-translate-api-languages-script](https://github.com/AidanWelch/google-translate-api-languages-script) - a simple script used to scrape languages for this project.
 
 ## License
 
