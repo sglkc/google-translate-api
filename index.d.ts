@@ -1,10 +1,10 @@
-export = googleTranslateApi;
+export default googleTranslateApi;
 
 declare function googleTranslateApi(
   query: string | string[] | {[key: string]: string},
   opts?: googleTranslateApi.IOptions,
-  requestOptions?: AxiosRequestConfig<any> | object,
-): Promise<googleTranslateApi.ITranslateResponse>;
+  requestOptions?: object,
+): googleTranslateApi.ITranslateResponseType<typeof query>;
 
 declare namespace googleTranslateApi {
   export interface IOptions {
@@ -14,7 +14,7 @@ declare namespace googleTranslateApi {
     forceTo?: boolean;
     tld?: string;
     autoCorrect?: boolean;
-    requestFunction?: fuction | string;
+    requestFunction?: Function | string;
   }
 
   export interface ITranslateLanguage {
@@ -38,9 +38,10 @@ declare namespace googleTranslateApi {
     raw: string;
   }
 
+  type ITranslateResponseType<T> = T extends string ? Promise<ITranslateResponse> : T extends string[] ? Promise<ITranslateResponse[]> : Promise<{[key in keyof T]: ITranslateResponse}>; 
+
   export enum languages {
     "auto" = "Automatic",
-    "auto" = "Detect language",
     "af" = "Afrikaans",
     "sq" = "Albanian",
     "am" = "Amharic",
