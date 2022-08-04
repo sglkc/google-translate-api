@@ -69,6 +69,7 @@ const res = await translate('I spea Dutch!', { from: 'en', to: 'nl', autoCorrect
 console.log(res.from.text.didYouMean); // => true
 console.log(res.from.text.autoCorrected); // => false
 console.log(res.from.text.value); // => 'I [speak] Dutch!'
+
 console.log(res.text); // => 'Ik speed Nederlands!'
 ```
 
