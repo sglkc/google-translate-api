@@ -65,11 +65,23 @@ test('translate some english text setting the source language as portuguese', as
     t.is(res.from.language.iso, 'en');
 });
 
-test('translate some misspelled english text to dutch', async t => {
-    const res = await translate('I spea Dutch', {from: 'en', to: 'nl'});
+test('translate some misspelled english text to dutch, expecting not autocorrrected', async t => {
+    const res = await translate('I spea Dutch!', {from: 'en', to: 'nl'});
 
-    if (res.from.text.autoCorrected || res.from.text.didYouMean) {
-        t.is(res.from.text.value, 'I [speak] Dutch');
+    if (res.from.text.didYouMean && !res.from.text.autoCorrected) {
+        t.is(res.from.text.value, 'I [speak] Dutch!');
+        t.is(res.text, 'Ik speed Nederlands!');
+    } else {
+        t.fail();
+    }
+});
+
+test('translate some mispelled english text to dutch, expecting autoCorrect', async t => {
+    const res = await translate('I spea Dutch!', {from: 'en', to: 'nl', autoCorrect: true});
+
+    if (!res.from.text.didYouMean && res.from.text.autoCorrected) {
+        t.is(res.from.text.value, 'I [speak] Dutch!');
+        t.is(res.text, 'Ik spreek Nederlands!');
     } else {
         t.fail();
     }

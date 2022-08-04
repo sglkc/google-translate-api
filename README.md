@@ -13,10 +13,10 @@ A **free** and **unlimited** API for Google Translate :dollar: :no_entry_sign: w
 - Language correction 
 - Fast and reliable – it uses the same servers that [translate.google.com](https://translate.google.com) uses
 - Wide compatibility through supporting Fetch, Axios, and custom request functions
-- Array or Object input to limit API requests from 2n to n + 1
+- Array or Object input to limit API requests
 
 ## Why this fork?
-This fork of the fork [vitalets/google-translate-api](https://github.com/vitalets/google-translate-api) contains several improvements with the primary change being it is written to support various request methods instead of Got, allowing for greater compatibility outside of Node.js.  It also abandons the outdated `querystring`.  Additionally, new languages are more frequently added, and if a new language is not yet in the languages.js list you can now bypass it with the `forceFrom` and `forceTo` options. 
+This fork of the fork [vitalets/google-translate-api](https://github.com/vitalets/google-translate-api) contains several improvements with the primary change being it is written to support various request methods instead of Got, allowing for greater compatibility outside of Node.js.  It also abandons the outdated `querystring`.  Additionally, new languages are more frequently added, and if a new language is not yet in the languages.js list you can now bypass it with the `forceFrom` and `forceTo` options.
 
 ## Install 
 
@@ -53,21 +53,23 @@ From English to Dutch with a typo (autoCorrect):
 ```js
 const res = await translate('I spea Dutch!', { from: 'en', to: 'nl', autoCorrect: true });
 
-console.log(res.from.text.didYouMean); // => true
+console.log(res.from.text.didYouMean); // => false
+console.log(res.from.text.autoCorrected); // => true
 console.log(res.from.text.value); // => 'I [speak] Dutch!'
 
-const correctedText = res.from.text.value.replace(/\[([a-z]+)\]/ig, '$1'); // => 'I speak Dutch!'
-const finalRes = await translate(correctedText, { from: 'en', to: 'nl' });
-
-console.log(finalRes.text); // => 'Ik spreek Nederlands!'
+console.log(res.text); // => 'Ik spreek Nederlands!'
 ```
 
-You can also add languages in the code and use them in the translation:
-``` js
-translate = require('google-translate-api-x');
-translate.languages['sr-Latn'] = 'Serbian Latin';
+#### Did you mean
+Even with autocorrect disabled Google Translate will still attempt to correct errors, but will not use the correction for translation.  However, it will update `res.from.text.value` with the corrected text:
 
-translate('translator', {to: 'sr-Latn'}).then(res => ...);
+```js
+const res = await translate('I spea Dutch!', { from: 'en', to: 'nl', autoCorrect: false });
+
+console.log(res.from.text.didYouMean); // => true
+console.log(res.from.text.autoCorrected); // => false
+console.log(res.from.text.value); // => 'I [speak] Dutch!'
+console.log(res.text); // => 'Ik speed Nederlands!'
 ```
 
 ### Array and Object inputs
@@ -116,6 +118,14 @@ console.log(res.text); // => 'নমস্কাৰ!'
 
 `forceFrom` can be used in the same way.
 
+You can also add languages in the code and use them in the translation:
+``` js
+translate = require('google-translate-api-x');
+translate.languages['sr-Latn'] = 'Serbian Latin';
+
+translate('translator', {to: 'sr-Latn'}).then(res => ...);
+```
+
 ## Proxy
 Google Translate has request limits. If too many requests are made, you can either end up with a 429 or a 503 error.
 You can use **proxy** to bypass them, however the default `requestFunction` of `fetch` does not support it:
@@ -157,12 +167,12 @@ Type: `object`
 ##### from
 Type: `string` Default: `auto`
 
-The `text` language. Must be `auto` or one of the codes/names (not case sensitive) contained in [languages.js](https://github.com/vitalets/google-translate-api/blob/master/languages.js).
+The `text` language. Must be `auto` or one of the codes/names (not case sensitive) contained in [languages.js](https://github.com/AidanWelch/google-translate-api/blob/master/languages.js).
 
 ##### to
 Type: `string` Default: `en`
 
-The language in which the text should be translated. Must be one of the codes/names (case sensitive!) contained in [languages.js](https://github.com/vitalets/google-translate-api/blob/master/languages.js).
+The language in which the text should be translated. Must be one of the codes/names (case sensitive!) contained in [languages.js](https://github.com/AidanWelch/google-translate-api/blob/master/languages.js).
 
 ##### forceFrom
 Type: `boolean` Default: `false`
@@ -173,6 +183,11 @@ Forces the translate function to use the `from` option as the iso code, without 
 Type: `boolean` Default: `false`
 
 Forces the translate function to use the `to` option as the iso code, without checking the languages list.
+
+##### autoCorrect
+Type: `boolean` Default: `false`
+
+Autocorrects the inputs, and uses those corrections in the translation.
 
 ##### raw
 Type: `boolean` Default: `false`
@@ -213,7 +228,7 @@ Matches the structure of the input, so returns just the individual object if jus
   - `text` *(object)*
     - `autoCorrected` *(boolean)* – `true` if the API has auto corrected the `text`
     - `value` *(string)* – The auto corrected `text` or the `text` with suggested corrections
-    - `didYouMean` *(boolean)* – `true` if the API has suggested corrections to the `text`
+    - `didYouMean` *(boolean)* – `true` if the API has suggested corrections to the `text` and did not autoCorrect
 - `raw` *(string)* - If `options.raw` is true, the raw response from Google Translate servers. Otherwise, `''`.
 
 Note that `res.from.text` will only be returned if `from.text.autoCorrected` or `from.text.didYouMean` equals to `true`. In this case, it will have the corrections delimited with brackets (`[ ]`):
