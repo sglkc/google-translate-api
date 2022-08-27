@@ -13,7 +13,7 @@ A **free** and **unlimited** API for Google Translate :dollar: :no_entry_sign: w
 - Language correction 
 - Fast and reliable – it uses the same servers that [translate.google.com](https://translate.google.com) uses
 - Wide compatibility through supporting Fetch, Axios, and custom request functions
-- Array or Object input to limit API requests
+- Batch many translations into one request with arrays or objects!.
 
 ## Why this fork?
 This fork of the fork [vitalets/google-translate-api](https://github.com/vitalets/google-translate-api) contains several improvements with the primary change being it is written to support various request methods instead of Got, allowing for greater compatibility outside of Node.js.  It also abandons the outdated `querystring`.  Additionally, new languages are more frequently added, and if a new language is not yet in the languages.js list you can now bypass it with the `forceFrom` and `forceTo` options.
@@ -73,7 +73,7 @@ console.log(res.from.text.value); // => 'I [speak] Dutch!'
 console.log(res.text); // => 'Ik speed Nederlands!'
 ```
 
-### Array and Object inputs
+### Array and Object inputs (Batch Requests)
 An array or object of inputs can be used to slightly lower the number of individual API calls:
 
 ```js
@@ -107,6 +107,26 @@ console.log(res.birthMonth.text); // => '2月'
 ```
 
 If you use `auto` each input can even be in a different language!
+
+### Batch Request with Different Options (Option Query)
+
+In Array and Object requests you can specify `from`, `to`, `forceFrom`, `forceTo`, and `autoCorrect` for each individual string to be translated by passing an object with the options set and the string as the text property.  Like so:
+
+```js
+const inputArray = [
+  'I speak Dutch!',
+  {text: 'I speak Japanese!', to: 'ja'},
+  {text: '¡Hablo checo!', from: 'es', to: 'cs', forceTo: true, autoCorrect: true}
+];
+
+const res = await translate(inputArray, { from: 'en', to: 'nl' });
+
+console.log(res[0].text); // => 'Ik spreek Nederlands!'
+console.log(res[1].text); // => '私は日本語を話します！'
+console.log(res[2].text); // => 'Mluvím česky!'
+```
+
+⚠️ You cannot pass a single translation by itself as an option query, it must either be passed as a string and use the options parameter, or passed wrapped by another array or object.  This the translate function cannot differentiate between a batch query object and an option query object. 
 
 ### Using languages not supported in languages.js yet
 If you know the ISO code used by Google Translate for a language and know it is supported but this API doesn't support it yet you can force it like so:

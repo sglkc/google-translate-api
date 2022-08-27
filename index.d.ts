@@ -1,19 +1,22 @@
 export default googleTranslateApi;
 
 declare function googleTranslateApi(
-  query: string | string[] | {[key: string]: string},
+  query: string | IQueryType[] | {[key: string]: IQueryType},
   opts?: googleTranslateApi.IOptions,
   requestOptions?: object,
 ): googleTranslateApi.ITranslateResponseType<typeof query>;
 
 declare namespace googleTranslateApi {
-  export interface IOptions {
+  interface ITranslationOptions {
     from?: string;
     to?: string;
     forceFrom?: boolean;
     forceTo?: boolean;
-    tld?: string;
     autoCorrect?: boolean;
+  }
+
+  export interface IOptions extends ITranslationOptions {
+    tld?: string;
     requestFunction?: Function | string;
   }
 
@@ -38,7 +41,13 @@ declare namespace googleTranslateApi {
     raw: string;
   }
 
-  type ITranslateResponseType<T> = T extends string ? Promise<ITranslateResponse> : T extends string[] ? Promise<ITranslateResponse[]> : Promise<{[key in keyof T]: ITranslateResponse}>; 
+  interface IOptionQuery extends ITranslationOptions {
+    text: string;
+  }
+
+  type IQueryType = string | IOptionQuery;
+
+  type ITranslateResponseType<T> = T extends string ? Promise<ITranslateResponse> : T extends IQueryType[] ? Promise<ITranslateResponse[]> : Promise<{[key in keyof T]: ITranslateResponse}>; 
 
   export enum languages {
     "auto" = "Automatic",

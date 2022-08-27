@@ -2,7 +2,7 @@ let axios;
 try {
     axios = require('axios');
 } catch (err) {}
-var languages = require('./languages');
+const languages = require('./languages');
 
 function extract(key, res) {
     var re = new RegExp(`"${key}":".*?"`);
@@ -11,6 +11,26 @@ function extract(key, res) {
         return result[0].replace(`"${key}":"`, '').slice(0, -1);
     }
     return '';
+}
+
+class Result {
+    text = '';
+    pronunciation = '';
+    from = {
+        language: {
+            didYouMean: false,
+            iso: ''
+        },
+        text: {
+            autoCorrected: false,
+            value: '',
+            didYouMean: false
+        }
+    }
+    raw = '';
+    constructor(raw) {
+        this.raw = raw;
+    }
 }
 
 function translate(input, opts, requestOptions) {
@@ -87,11 +107,10 @@ function translate(input, opts, requestOptions) {
 
     opts.from = opts.from || 'auto';
     opts.to = opts.to || 'en';
-    opts.tld = opts.tld || 'com';
     opts.autoCorrect = opts.autoCorrect === undefined ? false : Boolean(opts.autoCorrect);
-
     opts.from = opts.forceFrom ? opts.from : languages.getCode(opts.from);
     opts.to = opts.forceTo ? opts.to : languages.getCode(opts.to);
+    opts.tld = opts.tld || 'com';
 
     var url = 'https://translate.google.' + opts.tld;
 
@@ -128,50 +147,57 @@ function translate(input, opts, requestOptions) {
             'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
         };
 
-        const textArray = Array.isArray(input) ? input : (typeof input === 'object' ? Object.values(input) : [input]);
+        const sourceArray = Array.isArray(input) ? input : (typeof input === 'object' ? Object.values(input) : [input]);
 
-        const textRequests = [];
+        const freq = [];
+        for (let i = 0; i < sourceArray.length; i++) {
+            let from = sourceArray[i].from || opts.from;
+            const forceFrom = sourceArray[i].forceFrom || opts.forceFrom;
+            let to = sourceArray[i].to || opts.to;
+            const forceTo = sourceArray[i].forceTo || opts.forceTo;
+            [[from, forceFrom], [to, forceTo]].forEach(function ([lang, force]) {
+                if (!force && lang && !languages.isSupported(lang)) {
+                    const e = new Error('The language \'' + lang + '\' is not supported');
+                    e.code = 400;
+                    throw e;
+                }
+            });
+            from = forceFrom ? from : languages.getCode(from);
+            to = forceTo ? to : languages.getCode(to);
 
-        for (const text of textArray) {
-            const freq = [[[rpcids, JSON.stringify([[text, opts.from, opts.to, opts.autoCorrect], [null]]), null, 'generic']]];
-            const body = 'f.req=' + encodeURIComponent(JSON.stringify(freq)) + '&';
+            const autoCorrect = sourceArray[i].autoCorrect || opts.autoCorrect;
+            const text = sourceArray[i].text || sourceArray[i];
 
-            textRequests.push(
-                requestFunction(url, requestOptions, body).then(function (res) {
-                    var json = res.slice(6);
-                    var length = '';
+            // i (converted to base 36 to minimize request length) is used as a unique indentifier to order responses
+            const freqPart = [rpcids, JSON.stringify([[text, from, to, autoCorrect], [null]]), null, i.toString(36)];
+            freq.push(freqPart);
+        }
+        const body = 'f.req=' + encodeURIComponent(JSON.stringify([freq])) + '&';
 
-                    var result = {
-                        text: '',
-                        pronunciation: '',
-                        from: {
-                            language: {
-                                didYouMean: false,
-                                iso: ''
-                            },
-                            text: {
-                                autoCorrected: false,
-                                value: '',
-                                didYouMean: false
-                            }
-                        },
-                        raw: ''
-                    };
+        return requestFunction(url, requestOptions, body).then(function (res) {
+            res = res.slice(6);
 
-                    try {
-                        length = /^\d+/.exec(json)[0];
-                        json = JSON.parse(json.slice(length.length, parseInt(length, 10) + length.length));
-                        json = JSON.parse(json[0][2]);
-                        result.raw = json;
-                    } catch (e) {
-                        return result;
+            let finalResult = Array.isArray(input) ? [] : (typeof input === 'object' ? {} : undefined);
+
+            const resChunks = res.split('\n');
+            resChunks.forEach(chunk => {
+                if (chunk[0] !== '[' || chunk[3] === 'e') {
+                    return;
+                }
+                chunk = JSON.parse(chunk);
+                chunk.forEach(translation => {
+                    if (translation[0] !== 'wrb.fr') {
+                        return;
                     }
+                    const id = parseInt(translation[translation.length - 1], 36);
+                    translation = JSON.parse(translation[2]);
+                    const result = new Result(translation);
 
-                    if (json[1][0][0][5] === undefined || json[1][0][0][5] === null) {
+                    if (translation[1][0][0][5] === undefined || translation[1][0][0][5] === null) {
                         // translation not found, could be a hyperlink or gender-specific translation?
-                        result.text = json[1][0][0][0];
+                        result.text = translation[1][0][0][0];
                     } else {
-                        result.text = json[1][0][0][5]
+                        result.text = translation[1][0][0][5]
                             .map(function (obj) {
                                 return obj[0];
                             })
@@ -181,58 +207,52 @@ function translate(input, opts, requestOptions) {
                             // See: https://github.com/vitalets/google-translate-api/issues/73
                             .join(' ');
                     }
-                    result.pronunciation = json[1][0][0][1];
+                    result.pronunciation = translation[1][0][0][1];
 
                     // From language
-                    if (json[0] && json[0][1] && json[0][1][1]) {
+                    if (translation[0] && translation[0][1] && translation[0][1][1]) {
                         result.from.language.didYouMean = true;
-                        result.from.language.iso = json[0][1][1][0];
-                    } else if (json[1][3] === 'auto') {
-                        result.from.language.iso = json[2];
+                        result.from.language.iso = translation[0][1][1][0];
+                    } else if (translation[1][3] === 'auto') {
+                        result.from.language.iso = translation[2];
                     } else {
-                        result.from.language.iso = json[1][3];
+                        result.from.language.iso = translation[1][3];
                     }
 
                     // Did you mean & autocorrect
-                    if (json[0] && json[0][1] && json[0][1][0]) {
-                        var str = json[0][1][0][0][1];
+                    if (translation[0] && translation[0][1] && translation[0][1][0]) {
+                        var str = translation[0][1][0][0][1];
 
                         str = str.replace(/<b>(<i>)?/g, '[');
                         str = str.replace(/(<\/i>)?<\/b>/g, ']');
 
                         result.from.text.value = str;
 
-                        if (json[0][1][0][2] === 1) {
+                        if (translation[0][1][0][2] === 1) {
                             result.from.text.autoCorrected = true;
                         } else {
                             result.from.text.didYouMean = true;
                         }
                     }
-
-                    return result;
-                }).catch(function (err) {
-                    err.message += `\nUrl: ${url}`;
-                    if (err.statusCode !== undefined && err.statusCode !== 200) {
-                        err.code = 'BAD_REQUEST';
+                    if (Array.isArray(input)) {
+                        finalResult[id] = result;
+                    } else if (typeof input === 'object') {
+                        finalResult[Object.keys(input)[id]] = result;
                     } else {
-                        err.code = 'BAD_NETWORK';
+                        finalResult = result;
                     }
-                    throw err;
-                })
-            );
-        }
-
-        return Promise.all(textRequests).then(textResponses => {
-            if (Array.isArray(input)) {
-                return textResponses;
-            } else if (typeof input === 'object') {
-                const result = {};
-                Object.keys(input).forEach((key, index) => {
-                    result[key] = textResponses[index];
                 });
-                return result;
+            });
+
+            return finalResult;
+        }).catch(function (err) {
+            err.message += `\nUrl: ${url}`;
+            if (err.statusCode !== undefined && err.statusCode !== 200) {
+                err.code = 'BAD_REQUEST';
+            } else {
+                err.code = 'BAD_NETWORK';
             }
-            return textResponses[0];
+            throw err;
         });
     });
 }

@@ -7,9 +7,9 @@ try {
     }
 }
 
-var test = require('ava');
-var languages = require('./languages.js');
-var translate = require('./index.js');
+const test = require('ava');
+const languages = require('./languages.js');
+const translate = require('./index.js');
 
 test('translate without any options', async t => {
     const res = await translate('vertaler');
@@ -311,4 +311,47 @@ test('object input and output', async t => {
 
     t.is(res.dog.text, 'perra');
     t.is(res.cat.text, 'gata');
+});
+
+test('option query translate different languages', async t => {
+    const res = await translate([{text: 'dog', to: 'ar'}, 'cat'], {from: 'en', to: 'es'});
+
+    t.is(res[0].text, 'كلب');
+    t.is(res[1].text, 'gata');
+});
+
+test('large batch translate', async t => {
+    const sources = [];
+    const targets = [];
+    for (let i = 0; i < 1000; i++) {
+        const mod = i % 3;
+        if (mod === 0) {
+            sources.push('uno');
+            targets.push('one');
+        } else if (mod === 1) {
+            sources.push('dos');
+            targets.push('two');
+        } else {
+            sources.push('tres');
+            targets.push('three');
+        }
+    }
+
+    const res = await translate(sources, {from: 'es', to: 'en'});
+
+    const translations = res.map(translation => translation.text);
+
+    t.deepEqual(translations, targets);
+});
+
+test('force from language not listed in option query', async t => {
+    languages['ja'] = undefined;
+    const res = await translate(['test', {text: '犬', from: 'ja', to: 'en', forceFrom: true}]);
+    t.is(res[1].text, 'dog');
+});
+
+test('force to language not listed  in option query', async t => {
+    languages['ja'] = undefined;
+    const res = await translate(['test', {text: 'dog', from: 'en', to: 'ja', forceTo: true}]);
+    t.is(res[1].text, '犬');
 });
