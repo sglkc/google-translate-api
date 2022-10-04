@@ -175,7 +175,7 @@ test('translate from dutch to english using language names instead of codes', as
 });
 
 test('translate via custom tld', async t => {
-    const res = await translate('vertaler', {tld: 'cn'});
+    const res = await translate('vertaler', {tld: 'hk'});
 
     t.is(res.text, 'translator');
     t.false(res.from.language.didYouMean);
