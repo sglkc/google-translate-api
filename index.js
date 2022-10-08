@@ -6,7 +6,7 @@ const languages = require('./languages');
 
 function extract(key, res) {
     var re = new RegExp(`"${key}":".*?"`);
-    var result = re.exec(res.body);
+    var result = re.exec(res);
     if (result !== null) {
         return result[0].replace(`"${key}":"`, '').slice(0, -1);
     }
