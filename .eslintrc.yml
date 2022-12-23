@@ -1,0 +1,22 @@
+extends:
+  - eslint:recommended
+  - plugin:n/recommended
+
+env:
+  node: true
+  es2020: true
+
+parserOptions:
+  ecmaVersion: latest
+
+rules:
+  no-console: error
+  max-nested-callbacks: [error, { max: 2 }]
+  max-params: [error, { max: 4 }]
+  max-lines: [error, { max: 200, skipComments: true, skipBlankLines: true }]
+  semi: [error, always]
+  quotes: [error, single]
+  no-multiple-empty-lines: [error, { max: 1 }]
+  space-before-function-paren: [error, { anonymous: always, named: never, asyncArrow: always }]
+  no-constant-condition: [error, { checkLoops: false }]
+  no-dupe-keys: warn
