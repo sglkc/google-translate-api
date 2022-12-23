@@ -14,7 +14,7 @@
     "prepare": "git config core.hooksPath ./.hooks",
     "lint": "eslint --ext .cjs,.mjs index.cjs lib test",
     "test": "mocha",
-    "release": "npm run lint && npm t && npm run build && npm run test:esm && np --yolo --no-release-draft"
+    "release": "npm run lint && npm t && np --yolo --no-release-draft"
   },
   "devDependencies": {
     "eslint": "^8.25.0",
