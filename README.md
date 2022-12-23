@@ -14,9 +14,11 @@ A **free** and **unlimited** API for Google Translate :dollar: :no_entry_sign: w
 - Fast and reliable – it uses the same servers that [translate.google.com](https://translate.google.com) uses
 - Wide compatibility through supporting Fetch, Axios, and custom request functions
 - Batch many translations into one request with arrays or objects!.
+- Supports the single and batch translate endpoints.
+- Has both a translate method, and a Translator class which preserves options.
 
 ## Why this fork?
-This fork of the fork [vitalets/google-translate-api](https://github.com/vitalets/google-translate-api) contains several improvements with the primary change being it is written to support various request methods instead of Got, allowing for greater compatibility outside of Node.js.  It also abandons the outdated `querystring`.  Additionally, new languages are more frequently added, and if a new language is not yet in the languages.js list you can now bypass it with the `forceFrom` and `forceTo` options.  Furthermore, it supports batch translations in 1 request.
+This fork of the fork [vitalets/google-translate-api](https://github.com/vitalets/google-translate-api) contains several improvements with the primary change being it is written to support various request methods instead of Got, allowing for greater compatibility outside of Node.js.  It also abandons the outdated `querystring`.  Additionally, new languages are more frequently added, and if a new language is not yet in the languages.js list you can now bypass it with the `forceFrom` and `forceTo` options.  Furthermore, it supports batch translations in 1 request.  Many interfaces of the same endpoints either only use the single translate endpoint, which is quickly rate limited, or the batch translate endpoint which is sometimes innaccurate.
 
 ## Install 
 
@@ -32,6 +34,10 @@ From automatic language detection to English:
 const translate = require('google-translate-api-x');
 // Or of course
 import translate from 'google-translate-api-x';
+// Or deconstruct all the exposed variables as
+import { translate, Translator, singleTranslate, getBatchInitData, batchTranslate, languages, isSupported, getCode } from 'google-translate-api-x';
+// or again
+const { translate, Translator, singleTranslate, getBatchInitData, batchTranslate, languages, isSupported, getCode } = require('google-translate-api-x');
 
 const res = await translate('Ik spreek Engels', {to: 'en'});
 
@@ -58,6 +64,27 @@ console.log(res.from.text.autoCorrected); // => true
 console.log(res.from.text.value); // => 'I [speak] Dutch!'
 
 console.log(res.text); // => 'Ik spreek Nederlands!'
+```
+
+### Single translate endpoint
+Using the more accurate single translate endpoint requires setting forceBatch to false:
+```js
+const res = await translate('cat', {to: 'es', forceBatch: false});
+
+console.log(res.test); // => 'gato' instead of 'gata' which batch would return
+```
+
+### Persistent Options with Translator class
+```js
+import { Translator } from 'google-translate-api-x';
+const translator = new Translator({from: 'en', to: 'es', forceBatch: false, tld: 'es'});
+const cat = await translator.translate('cat');
+const dog = await translator.translate('dog');
+const birds = await translator.translate(['owl', 'hawk']);
+
+console.log(cat.text); // => 'gato'
+console.log(dog.text); // => 'perro'
+console.log([birds[0].text, birds[1].text]); // => '[ 'búho', 'halcón' ]'
 ```
 
 #### Did you mean
@@ -204,6 +231,16 @@ Forces the translate function to use the `from` option as the iso code, without 
 Type: `boolean` Default: `false`
 
 Forces the translate function to use the `to` option as the iso code, without checking the languages list.
+
+##### forceBatch
+Type: `boolean` Default: `true`
+
+Forces the translate function to use the batch endpoint, which is less likely to be rate limited than the single endpoint.
+
+##### fallbackBatch
+type: `boolean` Default: `true`
+
+Enables falling back to the batch endpoint if the single endpoint fails.
 
 ##### autoCorrect
 Type: `boolean` Default: `false`
