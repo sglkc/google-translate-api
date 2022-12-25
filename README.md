@@ -1,7 +1,6 @@
 # google-translate-api-x
 [![Actions Status](https://github.com/AidanWelch/google-translate-api/workflows/autotests/badge.svg)](https://github.com/AidanWelch/google-translate-api/actions)
 [![NPM version](https://img.shields.io/npm/v/google-translate-api-x.svg)](https://www.npmjs.com/package/google-translate-api-x)
-[![XO code style](https://img.shields.io/badge/code_style-XO-5ed9c7.svg)](https://github.com/sindresorhus/xo)
 
 A **free** and **unlimited** API for Google Translate :dollar: :no_entry_sign: written with compatibility in mind, made to be crossplatform.
 
@@ -18,7 +17,7 @@ A **free** and **unlimited** API for Google Translate :dollar: :no_entry_sign: w
 - Has both a translate method, and a Translator class which preserves options.
 
 ## Why this fork?
-This fork of the fork [vitalets/google-translate-api](https://github.com/vitalets/google-translate-api) contains several improvements with the primary change being it is written to support various request methods instead of Got, allowing for greater compatibility outside of Node.js.  It also abandons the outdated `querystring`.  Additionally, new languages are more frequently added, and if a new language is not yet in the languages.js list you can now bypass it with the `forceFrom` and `forceTo` options.  Furthermore, it supports batch translations in 1 request.  Many interfaces of the same endpoints either only use the single translate endpoint, which is quickly rate limited, or the batch translate endpoint which is sometimes innaccurate.
+This fork of [vitalets/google-translate-api](https://github.com/vitalets/google-translate-api) contains several improvements with the primary change being it is written to support both the batch and single Google Translate endpoints, as well as any input request function.  Additionally, there is optional language checking, and a list of supported languages that can best used.  Many similar package of the same endpoints either only use the single translate endpoint, which is quickly rate limited, or the batch translate endpoint which is sometimes innaccurate.
 
 ## Install 
 
@@ -253,13 +252,9 @@ Type: `boolean` Default: `false`
 If `true`, the returned object will have a `raw` property with the raw response (`string`) from Google Translate.
 
 ##### requestFunction
-Type: `string|function` Default: `fetch|axios`
+Type: `function` Default: `fetch`
 
-String inputs supported: `"fetch"` and `"axios"` for Fetch API and Axios respectively.
-
-Function inputs should takes `(url, requestOptions, ?data)` and return the body of the request as a string.
-
-Defaults to using fetch if available, axios if not.  And if neither are available and requestFunction is not defined as a function will error.
+Function inputs should takes `(url, requestOptions)` and mimick the response of the Fetch API with a `res.text()` and `res.json()` method. 
 
 ##### client
 Type: `string` Default: `"t"`
