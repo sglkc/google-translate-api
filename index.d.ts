@@ -1,17 +1,17 @@
 export default translate;
 export {translate, Translator};
 
-declare function translate<Query extends string | googleTranslateApi.Query[] | {[key: string]: googleTranslateApi.Query}> (
-	query: Query,
+declare function translate<Input extends googleTranslateApi.Input> (
+	input: Input,
 	opts?: googleTranslateApi.RequestOptions,
-): googleTranslateApi.TranslationResponseStructure<Query>;
+): googleTranslateApi.TranslationResponseStructure<Input>;
 
 declare class Translator {
 	constructor(options?: googleTranslateApi.RequestOptions);
-	translate<Query extends string | googleTranslateApi.Query[] | {[key: string]: googleTranslateApi.Query}> (
-		query: Query,
+	translate<Input extends googleTranslateApi.Input> (
+		input: Input,
 		opts?: googleTranslateApi.RequestOptions,
-	): googleTranslateApi.TranslationResponseStructure<Query>;
+	): googleTranslateApi.TranslationResponseStructure<Input>;
 	options: googleTranslateApi.RequestOptions;
 	initData: string;
 }
@@ -58,9 +58,9 @@ export declare namespace googleTranslateApi {
 		text: string;
 	}
 
-	export type Query = string | OptionQuery;
+	type Query = string | OptionQuery;
 
-	export type QueryOptions<T> = T extends string ? string : T extends Query[] ? Query[] : {[key: string]: Query};
+	export type Input = string | Query[] | {[key: string]: Query};
 
 	export type TranslationResponseStructure<T> = T extends string ? Promise<TranslationResponse> : T extends Query[] ? Promise<TranslationResponse[]> : Promise<{[key in keyof T]: TranslationResponse}>; 
 
