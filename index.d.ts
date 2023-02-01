@@ -1,25 +1,23 @@
 export default translate;
 export {translate, Translator};
 
-declare function translate(
-	query: string | IQueryType[] | {[key: string]: IQueryType},
-	opts?: googleTranslateApi.IOptions,
-	requestOptions?: object,
-): googleTranslateApi.ITranslateResponseType<typeof query>;
+declare function translate<Query extends string | googleTranslateApi.Query[] | {[key: string]: googleTranslateApi.Query}> (
+	query: Query,
+	opts?: googleTranslateApi.RequestOptions,
+): googleTranslateApi.TranslationResponseStructure<Query>;
 
 declare class Translator {
-	constructor(options: googleTranslateApi.IOptions);
-	translate(
-		query: string | IQueryType[] | {[key: string]: IQueryType},
-		opts?: googleTranslateApi.IOptions,
-		requestOptions?: object,
-	): googleTranslateApi.ITranslateResponseType<typeof query>;
-	options: googleTranslateApi.IOptions;
+	constructor(options?: googleTranslateApi.RequestOptions);
+	translate<Query extends string | googleTranslateApi.Query[] | {[key: string]: googleTranslateApi.Query}> (
+		query: Query,
+		opts?: googleTranslateApi.RequestOptions,
+	): googleTranslateApi.TranslationResponseStructure<Query>;
+	options: googleTranslateApi.RequestOptions;
 	initData: string;
 }
 
-declare namespace googleTranslateApi {
-	interface ITranslationOptions {
+export declare namespace googleTranslateApi {
+	interface TranslationOptions {
 		from?: string;
 		to?: string;
 		forceFrom?: boolean;
@@ -27,41 +25,44 @@ declare namespace googleTranslateApi {
 		autoCorrect?: boolean;
 	}
 
-	export interface IOptions extends ITranslationOptions {
+	export interface RequestOptions extends TranslationOptions {
 		tld?: string;
 		requestFunction?: Function;
 		forceBatch?: boolean;
 		fallbackBatch?: boolean;
+		requestOptions?: object;
 	}
 
-	export interface ITranslateLanguage {
+	interface TranslatedLanguage {
 		didYouMean: boolean;
 		iso: string;
 	}
 
-	export interface ITranslateText {
+	interface TranslatedText {
 		autoCorrected: boolean;
 		value: string;
 		didYouMean: boolean;
 	}
 
-	export interface ITranslateResponse {
+	export interface TranslationResponse {
 		text: string;
 		pronunciation?: string;
 		from: {
-			language: ITranslateLanguage;
-			text: ITranslateText;
+			language: TranslatedLanguage;
+			text: TranslatedText;
 		};
 		raw: string;
 	}
 
-	interface IOptionQuery extends ITranslationOptions {
+	interface OptionQuery extends TranslationOptions {
 		text: string;
 	}
 
-	type IQueryType = string | IOptionQuery;
+	export type Query = string | OptionQuery;
 
-	type ITranslateResponseType<T> = T extends string ? Promise<ITranslateResponse> : T extends IQueryType[] ? Promise<ITranslateResponse[]> : Promise<{[key in keyof T]: ITranslateResponse}>; 
+	export type QueryOptions<T> = T extends string ? string : T extends Query[] ? Query[] : {[key: string]: Query};
+
+	export type TranslationResponseStructure<T> = T extends string ? Promise<TranslationResponse> : T extends Query[] ? Promise<TranslationResponse[]> : Promise<{[key in keyof T]: TranslationResponse}>; 
 
 	export enum languages {
 		"auto" = "Automatic",

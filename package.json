@@ -4,6 +4,7 @@
   "description": "A free and unlimited API for Google Translate",
   "main": "./index.cjs",
   "module": "./index.cjs",
+  "types": "./index.d.ts",
   "files": [
     "lib",
     "README.md",
@@ -12,7 +13,7 @@
   ],
   "scripts": {
     "prepare": "git config core.hooksPath ./.hooks",
-    "lint": "eslint --ext .cjs,.mjs index.cjs lib test",
+    "lint": "eslint --ext .cjs,.mjs index.cjs lib test && tsd -f ./test",
     "test": "mocha",
     "release": "npm run lint && npm t && np --yolo --no-release-draft"
   },
@@ -21,7 +22,8 @@
     "eslint-plugin-mocha": "^10.1.0",
     "eslint-plugin-n": "^15.6.0",
     "mocha": "^10.1.0",
-    "np": "^7.6.2"
+    "np": "^7.6.2",
+    "tsd": "^0.25.0"
   },
   "repository": {
     "type": "git",
