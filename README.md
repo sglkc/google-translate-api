@@ -11,13 +11,13 @@ A **free** and **unlimited** API for Google Translate :dollar: :no_entry_sign: w
 - Spelling correction
 - Language correction 
 - Fast and reliable – it uses the same servers that [translate.google.com](https://translate.google.com) uses
-- Wide compatibility through supporting Fetch, Axios, and custom request functions
+- Wide compatibility through supporting Fetch and custom request functions
 - Batch many translations into one request with arrays or objects!.
 - Supports the single and batch translate endpoints.
 - Has both a translate method, and a Translator class which preserves options.
 
 ## Why this fork?
-This fork of [vitalets/google-translate-api](https://github.com/vitalets/google-translate-api) contains several improvements with the primary change being it is written to support both the batch and single Google Translate endpoints, as well as any input request function.  Additionally, there is optional language checking, and a list of supported languages that can best used.  Many similar package of the same endpoints either only use the single translate endpoint, which is quickly rate limited, or the batch translate endpoint which is sometimes innaccurate.
+This fork of [vitalets/google-translate-api](https://github.com/vitalets/google-translate-api) contains several improvements with the primary change being it is written to support both the batch and single Google Translate endpoints, as well as any input request function.  Additionally, there is optional language checking, and a list of supported languages that can best used.  Many similar packages of the same endpoints either only use the single translate endpoint, which is quickly rate limited, or the batch translate endpoint which is sometimes innaccurate.
 
 ## Install 
 
@@ -49,10 +49,10 @@ If server returns **Response code 403 (Forbidden)** try set option `client=gtx`:
 const res = await translate('Ik spreek Engels', { to: 'en', client: 'gtx' }).then(res => { ... });
 ```
 
-> Please note that maximum text length for single translation call is **5000** characters. 
+> Please note that maximum text length for translation call is **5000** characters. 
 > In case of longer text you should split it on chunks, see [#20](https://github.com/vitalets/google-translate-api/issues/20).
 
-### Autocorrect
+## Autocorrect
 From English to Dutch with a typo (autoCorrect):
 
 ```js
@@ -65,15 +65,28 @@ console.log(res.from.text.value); // => 'I [speak] Dutch!'
 console.log(res.text); // => 'Ik spreek Nederlands!'
 ```
 
-### Single translate endpoint
+These reported values are often inaccurate and cannot be relied upon
+
+## Single and Batch Endpoints
+
+### Single translate
+
+The single translate endpoint is generally more accurate- and I suspect is a more advanced translation engine.  Noticably it is more accurate(but still not completely accurate) when it comes to gendered words.
 Using the more accurate single translate endpoint requires setting forceBatch to false:
 ```js
 const res = await translate('cat', {to: 'es', forceBatch: false});
 
 console.log(res.test); // => 'gato' instead of 'gata' which batch would return
 ```
+And to guarantee it is used you can also pass `fallbackBatch: false`.
 
-### Persistent Options with Translator class
+⚠️**However, the single translate endpoint is much more likely to be ratelimited and have your request rejected than the batch translate endpoint!**
+
+### Batch translate
+
+Because of the risk of being ratelimited- the default endpoint and fallback endpoint for this package is the batch translate endpoint.  It notably supports multiple queries in one request- so batch requests always go through the batch endpoint.
+
+## Persistent Options with Translator class
 ```js
 import { Translator } from 'google-translate-api-x';
 const translator = new Translator({from: 'en', to: 'es', forceBatch: false, tld: 'es'});
@@ -86,7 +99,7 @@ console.log(dog.text); // => 'perro'
 console.log([birds[0].text, birds[1].text]); // => '[ 'búho', 'halcón' ]'
 ```
 
-#### Did you mean
+## Did you mean
 Even with autocorrect disabled Google Translate will still attempt to correct errors, but will not use the correction for translation.  However, it will update `res.from.text.value` with the corrected text:
 
 ```js
@@ -99,7 +112,7 @@ console.log(res.from.text.value); // => 'I [speak] Dutch!'
 console.log(res.text); // => 'Ik speed Nederlands!'
 ```
 
-### Array and Object inputs (Batch Requests)
+## Array and Object inputs (Batch Requests)
 An array or object of inputs can be used to slightly lower the number of individual API calls:
 
 ```js
@@ -154,7 +167,7 @@ console.log(res[2].text); // => 'Mluvím česky!'
 
 ⚠️ You cannot pass a single translation by itself as an option query, it must either be passed as a string and use the options parameter, or passed wrapped by another array or object.  This the translate function cannot differentiate between a batch query object and an option query object. 
 
-### Using languages not supported in languages.js yet
+## Using languages not supported in languages.js yet
 If you know the ISO code used by Google Translate for a language and know it is supported but this API doesn't support it yet you can force it like so:
 
 ```js
@@ -174,22 +187,17 @@ translate('translator', {to: 'sr-Latn'}).then(res => ...);
 ```
 
 ## Proxy
-Google Translate has request limits. If too many requests are made, you can either end up with a 429 or a 503 error.
-You can use **proxy** to bypass them, however the default `requestFunction` of `fetch` does not support it:
+Google Translate has request limits(supposedly for batch- and definitely for single translate). If too many requests are made, you can either end up with a 429 or a 503 error.
+You can use **proxy** to bypass them, the best way is to pass a proxy agent to fetch through requestOptions:
+```
+npm install https-proxy-agent
+```
+
 ```js
-const tunnel = require('tunnel');
+import HttpsProxyAgent from require('https-proxy-agent');
 translate('Ik spreek Engels', {to: 'en', requestOptions: {
-    agent: tunnel.httpsOverHttp({
-    proxy: { 
-      host: 'whateverhost',
-      proxyAuth: 'user:pass',
-      port: '8080',
-      headers: {
-        'User-Agent': 'Node'
-      }
-    }
-  })
-}
+    agent: new HttpsProxyAgent('proxy-url-here');
+  }
 }).then(res => {
     // do something
 });
