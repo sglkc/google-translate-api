@@ -178,7 +178,7 @@ Google Translate has request limits. If too many requests are made, you can eith
 You can use **proxy** to bypass them, however the default `requestFunction` of `fetch` does not support it:
 ```js
 const tunnel = require('tunnel');
-translate('Ik spreek Engels', {to: 'en'}, {
+translate('Ik spreek Engels', {to: 'en', requestOptions: {
     agent: tunnel.httpsOverHttp({
     proxy: { 
       host: 'whateverhost',
@@ -188,8 +188,9 @@ translate('Ik spreek Engels', {to: 'en'}, {
         'User-Agent': 'Node'
       }
     }
-  }
-)}).then(res => {
+  })
+}
+}).then(res => {
     // do something
 });
 ```
@@ -254,7 +255,7 @@ If `true`, the returned object will have a `raw` property with the raw response 
 ##### requestFunction
 Type: `function` Default: `fetch`
 
-Function inputs should takes `(url, requestOptions)` and mimick the response of the Fetch API with a `res.text()` and `res.json()` method. 
+Function inputs should take `(url, requestOptions)` and mimick the response of the Fetch API with a `res.text()` and `res.json()` method. 
 
 ##### client
 Type: `string` Default: `"t"`
@@ -266,10 +267,10 @@ Type: `string` Default: `"com"`
 
 TLD for Google translate host to be used in API calls: `https://translate.google.{tld}`.
 
-#### requestOptions
+##### requestOptions
 Type: `object`
 
-The options used by the requestFunction.  The [fetchinit](https://developer.mozilla.org/en-US/docs/Web/API/fetch) and [axiosconfig](https://axios-http.com/docs/req_config) are the default used.  requestOptions.headers is automatically converted to the `Header` class for fetchinit.
+The options used by the requestFunction.  Must be in the style of [fetchinit](https://developer.mozilla.org/en-US/docs/Web/API/fetch).
 
 ### Returns an `object` | `object[]` | `{[key]: object}`}:
 Matches the structure of the input, so returns just the individual object if just a string is input, an array if an array is input, object with the same keys if an object is input.  Regardless of that, each returned value will have this schema:
