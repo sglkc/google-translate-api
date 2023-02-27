@@ -8,10 +8,14 @@ describe('translate()', function () {
 		assert.equal(res.text, 'gata');
 	});
 
-	it('should translate single input with forceBatch false', async () => {
-		const res = await translate('cat', {from: 'en', to: 'es', forceBatch: false});
+	it('should translate single input with fallbackBatch false', async () => {
+		try {
+			const res = await translate('cat', {from: 'en', to: 'es', forceBatch: false, fallbackBatch: false});
 
-		assert.equal(res.text, 'gato');
+			assert.equal(res.text, 'gato');
+		} catch (e) {
+			assert.equal(e.message, 'Too Many Requests');
+		}
 	});
 
 	it('should translate array input with forceBatch false', async () => {
