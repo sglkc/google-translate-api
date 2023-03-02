@@ -160,6 +160,6 @@ describe('batchTranslate()', function () {
 			this.initData
 		);
 	
-		assert.equal(res.text, 'Vertaler, vertaler. vertaler! vertaler? vertaler, vertaler.translator! Vertaler?');
+		assert.equal(res.text, 'vertaler, vertaler. vertaler! vertaler? Vertaler, vertaler.translator! Vertaler?');
 	});
 });
