@@ -12,9 +12,10 @@ A **free** and **unlimited** API for Google Translate :dollar: :no_entry_sign: w
 - Language correction 
 - Fast and reliable – it uses the same servers that [translate.google.com](https://translate.google.com) uses
 - Wide compatibility through supporting Fetch and custom request functions
-- Batch many translations into one request with arrays or objects!.
-- Supports the single and batch translate endpoints.
-- Has both a translate method, and a Translator class which preserves options.
+- Batch many translations into one request with arrays or objects!
+- Supports the single and batch translate endpoints
+- Has both a translate method, and a Translator class which preserves options
+- Text-to-Speech from the Google Translate API using the `speak` method
 
 ## Why this fork?
 This fork of [vitalets/google-translate-api](https://github.com/vitalets/google-translate-api) contains several improvements with the primary change being it is written to support both the batch and single Google Translate endpoints, as well as any input request function.  Additionally, there is optional language checking, and a list of supported languages that can best used.  Many similar packages of the same endpoints either only use the single translate endpoint, which is quickly rate limited, or the batch translate endpoint which is sometimes innaccurate.
@@ -66,6 +67,17 @@ console.log(res.text); // => 'Ik spreek Nederlands!'
 ```
 
 These reported values are often inaccurate and cannot be relied upon
+
+## Text-to-Speech (TTS)
+A TTS request is made just like a translate request but using the speak method.  The language spoken is the `to` language in options(or query params).
+The response is just a Base64 MP3 as a string.
+```js
+import { speak } from './index.cjs';
+import { writeFileSync } from 'fs';
+
+const res = await speak('gata', {to: 'es'}); // => Base64 encoded mp3
+writeFileSync('cat.mp3', res, {encoding:'base64'}); // Saves the mp3 to file
+```
 
 ## Single and Batch Endpoints
 

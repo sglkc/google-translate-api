@@ -1,5 +1,5 @@
 export default translate;
-export {translate, Translator};
+export {translate, Translator, speak};
 
 declare function translate<Input extends googleTranslateApi.Input> (
 	input: Input,
@@ -15,6 +15,11 @@ declare class Translator {
 	options: googleTranslateApi.RequestOptions;
 	initData: string;
 }
+
+declare function speak<Input extends googleTranslateApi.Input> (
+	input: Input,
+	opts?: googleTranslateApi.RequestOptions,
+): googleTranslateApi.SpeakResponseStructure<Input>;
 
 export declare namespace googleTranslateApi {
 	interface TranslationOptions {
@@ -62,7 +67,9 @@ export declare namespace googleTranslateApi {
 
 	export type Input = string | Query[] | {[key: string]: Query};
 
-	export type TranslationResponseStructure<T> = T extends string ? Promise<TranslationResponse> : T extends Query[] ? Promise<TranslationResponse[]> : Promise<{[key in keyof T]: TranslationResponse}>; 
+	export type TranslationResponseStructure<T> = T extends string ? Promise<TranslationResponse> : T extends Query[] ? Promise<TranslationResponse[]> : Promise<{[key in keyof T]: TranslationResponse}>;
+
+	export type SpeakResponseStructure<T> = T extends string ? Promise<string> : T extends Query[] ? Promise<string[]> : Promise<{[key in keyof T]: string}>;
 
 	export enum languages {
 		"auto" = "Automatic",
