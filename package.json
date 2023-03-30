@@ -1,6 +1,6 @@
 {
   "name": "google-translate-api-x",
-  "version": "10.6.0",
+  "version": "10.6.1",
   "description": "A free and unlimited API for Google Translate",
   "main": "./index.cjs",
   "module": "./index.cjs",
@@ -41,9 +41,9 @@
     "react",
     "extension",
     "web",
-	"tts",
-	"text-to-speech",
-	"speak"
+    "tts",
+    "text-to-speech",
+    "speak"
   ],
   "author": {
     "name": "Matheus Fernandes",
