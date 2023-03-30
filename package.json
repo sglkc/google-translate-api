@@ -41,7 +41,10 @@
     "fetch",
     "react",
     "extension",
-    "web"
+    "web",
+	"tts",
+	"text-to-speech",
+	"speak"
   ],
   "author": {
     "name": "Matheus Fernandes",
