@@ -235,12 +235,12 @@ Type: `object`
 ##### from
 Type: `string` Default: `auto`
 
-The `text` language. Must be `auto` or one of the codes/names (not case sensitive) contained in [languages.js](https://github.com/AidanWelch/google-translate-api/blob/master/languages.js).
+The `text` language. Must be `auto` or one of the codes/names (not case sensitive) contained in [languages.cjs](https://github.com/AidanWelch/google-translate-api/blob/master/lib/languages.cjs).
 
 ##### to
 Type: `string` Default: `en`
 
-The language in which the text should be translated. Must be one of the codes/names (case sensitive!) contained in [languages.js](https://github.com/AidanWelch/google-translate-api/blob/master/languages.js).
+The language in which the text should be translated. Must be one of the codes/names (case sensitive!) contained in [languages.cjs](https://github.com/AidanWelch/google-translate-api/blob/master/lib/languages.cjs).
 
 ##### forceFrom
 Type: `boolean` Default: `false`
@@ -298,7 +298,7 @@ Matches the structure of the input, so returns just the individual object if jus
 - `from` *(object)*
   - `language` *(object)*
     - `didYouMean` *(boolean)* - `true` if the API suggest a correction in the source language
-    - `iso` *(string)* - The [code of the language](https://github.com/vitalets/google-translate-api/blob/master/languages.js) that the API has recognized in the `text`
+    - `iso` *(string)* - The [code of the language](https://github.com/AidanWelch/google-translate-api/blob/master/lib/languages.cjs) that the API has recognized in the `text`
   - `text` *(object)*
     - `autoCorrected` *(boolean)* – `true` if the API has auto corrected the `text`
     - `value` *(string)* – The auto corrected `text` or the `text` with suggested corrections
