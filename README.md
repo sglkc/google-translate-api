@@ -35,9 +35,9 @@ const translate = require('google-translate-api-x');
 // Or of course
 import translate from 'google-translate-api-x';
 // Or deconstruct all the exposed variables as
-import { translate, Translator, singleTranslate, getBatchInitData, batchTranslate, languages, isSupported, getCode } from 'google-translate-api-x';
+import { translate, Translator, speak, singleTranslate, getBatchInitData, batchTranslate, languages, isSupported, getCode } from 'google-translate-api-x';
 // or again
-const { translate, Translator, singleTranslate, getBatchInitData, batchTranslate, languages, isSupported, getCode } = require('google-translate-api-x');
+const { translate, Translator, speak, singleTranslate, getBatchInitData, batchTranslate, languages, isSupported, getCode } = require('google-translate-api-x');
 
 const res = await translate('Ik spreek Engels', {to: 'en'});
 
@@ -72,7 +72,7 @@ These reported values are often inaccurate and cannot be relied upon
 A TTS request is made just like a translate request but using the speak method.  The language spoken is the `to` language in options(or query params).
 The response is just a Base64 MP3 as a string.
 ```js
-import { speak } from './index.cjs';
+import { speak } from 'google-translate-api-x';
 import { writeFileSync } from 'fs';
 
 const res = await speak('gata', {to: 'es'}); // => Base64 encoded mp3
