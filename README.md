@@ -218,79 +218,28 @@ translate('Ik spreek Engels', {to: 'en', requestOptions: {
 ## Does it work from web page context?
 It can, sort of. `https://translate.google.com` does not provide [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) http headers allowing access from other domains.  However, this fork is written using Fetch and/or Axios, allowing contexts that don't request CORS access, such as a browser extension background script or React Native.
 
+## Usage with Expo and some other cases with babel
+You will need to install `@babel/plugin-proposal-private-methods` and add it to your babel plugins config like so:
+```js
+module.exports = function (api) {
+	api.cache(true);
+	return {
+		presets: ['babel-preset-expo'],
+		plugins: [['@babel/plugin-proposal-private-methods', { loose: true }]],
+	};
+};
+```
+
+
 ## API
 
-### translate(text, [options], [requestOptions])
+### translate(input, options)
 
 #### input
 
-Type: `string` | `string[]` | `{[key]: string}`
+Type: `string` | `string[]` | `{[key]: string}` | `{text: string, ...options}[]` | `{ [key]: {text: string, ...options} }`
 
-The text to be translated.
-
-#### options
-
-Type: `object`
-
-##### from
-Type: `string` Default: `auto`
-
-The `text` language. Must be `auto` or one of the codes/names (not case sensitive) contained in [languages.cjs](https://github.com/AidanWelch/google-translate-api/blob/master/lib/languages.cjs).
-
-##### to
-Type: `string` Default: `en`
-
-The language in which the text should be translated. Must be one of the codes/names (case sensitive!) contained in [languages.cjs](https://github.com/AidanWelch/google-translate-api/blob/master/lib/languages.cjs).
-
-##### forceFrom
-Type: `boolean` Default: `false`
-
-Forces the translate function to use the `from` option as the iso code, without checking the languages list.
-
-##### forceTo
-Type: `boolean` Default: `false`
-
-Forces the translate function to use the `to` option as the iso code, without checking the languages list.
-
-##### forceBatch
-Type: `boolean` Default: `true`
-
-Forces the translate function to use the batch endpoint, which is less likely to be rate limited than the single endpoint.
-
-##### fallbackBatch
-type: `boolean` Default: `true`
-
-Enables falling back to the batch endpoint if the single endpoint fails.
-
-##### autoCorrect
-Type: `boolean` Default: `false`
-
-Autocorrects the inputs, and uses those corrections in the translation.
-
-##### raw
-Type: `boolean` Default: `false`
-
-If `true`, the returned object will have a `raw` property with the raw response (`string`) from Google Translate.
-
-##### requestFunction
-Type: `function` Default: `fetch`
-
-Function inputs should take `(url, requestOptions)` and mimick the response of the Fetch API with a `res.text()` and `res.json()` method. 
-
-##### client
-Type: `string` Default: `"t"`
-
-Query parameter `client` used in API calls. Can be `t|gtx`.
-
-##### tld
-Type: `string` Default: `"com"`
-
-TLD for Google translate host to be used in API calls: `https://translate.google.{tld}`.
-
-##### requestOptions
-Type: `object`
-
-The options used by the requestFunction.  Must be in the style of [fetchinit](https://developer.mozilla.org/en-US/docs/Web/API/fetch).
+The text to be translated, with optionally specific options for that text
 
 ### Returns an `object` | `object[]` | `{[key]: object}`}:
 Matches the structure of the input, so returns just the individual object if just a string is input, an array if an array is input, object with the same keys if an object is input.  Regardless of that, each returned value will have this schema:
@@ -316,6 +265,89 @@ translate('I spea Dutch').then(res => {
 });
 ```
 Otherwise, it will be an empty `string` (`''`).
+
+### speak(input, options)
+
+#### input
+
+Type: `string` | `string[]` | `{[key]: string}` | `{text: string, ...options}[]` | `{ [key]: {text: string, ...options} }`
+
+The text to be spoken, with optionally specific options for that text.
+
+The `to` field of options is used for the language spoken in
+
+### Returns a `string` | `string[]` | `{[key]: string}`}:
+The returned string is a Base64 encoded mp3.
+
+### Translator(options)
+
+### Returns a `translator`:
+An object with these options as the default, that you can call the translate method on.
+
+### options
+
+Type: `object`
+
+#### from
+Type: `string` Default: `auto`
+
+The `text` language. Must be `auto` or one of the codes/names (not case sensitive) contained in [languages.cjs](https://github.com/AidanWelch/google-translate-api/blob/master/lib/languages.cjs).
+
+#### to
+Type: `string` Default: `en`
+
+The language in which the text should be translated. Must be one of the codes/names (case sensitive!) contained in [languages.cjs](https://github.com/AidanWelch/google-translate-api/blob/master/lib/languages.cjs).
+
+#### forceFrom
+Type: `boolean` Default: `false`
+
+Forces the translate function to use the `from` option as the iso code, without checking the languages list.
+
+#### forceTo
+Type: `boolean` Default: `false`
+
+Forces the translate function to use the `to` option as the iso code, without checking the languages list.
+
+#### forceBatch
+Type: `boolean` Default: `true`
+
+Forces the translate function to use the batch endpoint, which is less likely to be rate limited than the single endpoint.
+
+#### fallbackBatch
+type: `boolean` Default: `true`
+
+Enables falling back to the batch endpoint if the single endpoint fails.
+
+#### autoCorrect
+Type: `boolean` Default: `false`
+
+Autocorrects the inputs, and uses those corrections in the translation.
+
+#### raw
+Type: `boolean` Default: `false`
+
+If `true`, the returned object will have a `raw` property with the raw response (`string`) from Google Translate.
+
+#### requestFunction
+Type: `function` Default: `fetch`
+
+Function inputs should take `(url, requestOptions)` and mimick the response of the Fetch API with a `res.text()` and `res.json()` method.
+
+#### client
+Type: `string` Default: `"t"`
+
+Query parameter `client` used in API calls. Can be `t|gtx`.
+
+#### tld
+Type: `string` Default: `"com"`
+
+TLD for Google translate host to be used in API calls: `https://translate.google.{tld}`.
+
+#### requestOptions
+Type: `object`
+
+The options used by the requestFunction.  Must be in the style of [fetchinit](https://developer.mozilla.org/en-US/docs/Web/API/fetch).
+
 
 ## Related projects
 * [Translateer](https://github.com/Songkeys/Translateer) - uses Puppeteer to access Google Translate API.
