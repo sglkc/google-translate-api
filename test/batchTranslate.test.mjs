@@ -88,6 +88,19 @@ describe('batchTranslate()', function () {
 		assert.equal(res.cat.text, 'gata');
 	});
 
+	it('should translate on some empty input', async () => {
+		const res = await batchTranslate({dog: 'dog', empty: ''}, {from: 'en', to: 'es'}, this.initData);
+
+		assert.equal(res.dog.text, 'perra');
+		assert.equal(res.empty.text, '');
+	});
+
+	it('should translate on just empty input', async () => {
+		const res = await batchTranslate([''], {from: 'en', to: 'es'}, this.initData);
+
+		assert.equal(res[0].text, '');
+	});
+
 	it('should option query translate different languages', async () => {
 		const res = await batchTranslate([{text: 'dog', to: 'ar'}, 'cat'], {from: 'en', to: 'es'}, this.initData);
 	

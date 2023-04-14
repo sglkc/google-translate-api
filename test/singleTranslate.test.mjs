@@ -56,4 +56,11 @@ describe('singleTranslate()', function () {
 		await assert.rejects(singleTranslate('This is a test', {to: 'abc', from: 'en'}));
 		await assert.rejects(singleTranslate('This is a test', {to: 'en', from: 'ii'}));
 	});
+
+	it('should not error on empty input', async () => {
+		const res = await singleTranslate('', {to: 'es', from: 'en'});
+
+		assert.equal(res.text, '');
+	});
+
 });
