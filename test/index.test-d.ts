@@ -1,4 +1,3 @@
-import { execArgv } from 'process';
 import { expectType } from 'tsd';
 import { translate, Translator, googleTranslateApi, speak } from '..';
 
