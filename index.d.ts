@@ -36,6 +36,7 @@ export declare namespace googleTranslateApi {
 		forceBatch?: boolean;
 		fallbackBatch?: boolean;
 		requestOptions?: object;
+		rejectOnPartialFail?: boolean;
 	}
 
 	interface TranslatedLanguage {

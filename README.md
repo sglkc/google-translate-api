@@ -323,6 +323,11 @@ Type: `boolean` Default: `false`
 
 Autocorrects the inputs, and uses those corrections in the translation.
 
+#### rejectOnPartialFail
+Type: `boolean` Default: `true`
+
+When true rejects whenever any translation in a batch fails- otherwise will just return `null` instead of that translation.
+
 #### raw
 Type: `boolean` Default: `false`
 

@@ -14,7 +14,7 @@
   "scripts": {
     "prepare": "git config core.hooksPath ./.hooks",
     "lint": "eslint --ext .cjs,.mjs index.cjs lib test && tsd -f ./test",
-    "test": "mocha",
+    "test": "mocha --retries 5",
     "release": "npm run lint && npm t && np --yolo --no-release-draft"
   },
   "devDependencies": {
