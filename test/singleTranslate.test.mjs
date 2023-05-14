@@ -3,6 +3,7 @@ import { singleTranslate } from '../index.cjs';
 
 describe('singleTranslate()', function () {
 	this.timeout(5000);
+	this.retries(1);
 
 	it('should translate individual word with defaults', async () => {
 		try {
