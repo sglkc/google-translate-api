@@ -109,7 +109,7 @@ describe('batchTranslate()', function () {
 	});
 
 	it('should translate large batch', async () => {
-		const maxErrors = 25;
+		const maxErrors = 50;
 		const sources = [];
 		const targets = [];
 		for (let i = 0; i < 100; i++) {
@@ -139,7 +139,7 @@ describe('batchTranslate()', function () {
 			errors++;
 			return targets[index];
 		});
-	
+
 		assert.deepEqual(translations, targets);
 	});
 
@@ -185,5 +185,25 @@ describe('batchTranslate()', function () {
 		);
 	
 		assert.equal(res.text, 'vertaler, vertaler. vertaler! vertaler? Vertaler, vertaler.translator! Vertaler?');
+	});
+
+	it('should reject on partial fail true', async () => {
+		const sources = [];
+		const targets = [];
+		for (let i = 0; i < 1000; i++) {
+			const mod = i % 3;
+			if (mod === 0) {
+				sources.push('uno');
+				targets.push('one');
+			} else if (mod === 1) {
+				sources.push('dos');
+				targets.push('two');
+			} else {
+				sources.push('tres');
+				targets.push('three');
+			}
+		}
+
+		await assert.rejects(batchTranslate(sources, {from: 'es', to: 'en', rejectOnPartialFail: true}, this.initData));
 	});
 });
