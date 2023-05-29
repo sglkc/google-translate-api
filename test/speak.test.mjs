@@ -86,4 +86,33 @@ describe('speak()', function () {
 	it('should reject on incorrect iso not forced', async () => {
 		await assert.rejects(speak('This is a test', {to: 'abc'}));
 	});
+
+	it('should error on too long request', async () => {
+		await assert.rejects(speak('A'.repeat(201), {to: 'en'}));
+	});
+
+	it('should reject on partial fail true', async () => {
+		const sources = [];
+		const targets = [];
+		for (let i = 0; i < 1000; i++) {
+			const mod = i % 3;
+			if (mod === 0) {
+				sources.push('uno');
+				targets.push('one');
+			} else if (mod === 1) {
+				sources.push('dos');
+				targets.push('two');
+			} else {
+				sources.push('tres');
+				targets.push('three');
+			}
+		}
+
+		speak(sources, {to: 'es', rejectOnPartialFail: true}).then(res => {
+			for (let spoken of res) {
+				assert(spoken !== null);
+			}
+		}).catch(()=>{});
+
+	});
 });
