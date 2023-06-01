@@ -50,7 +50,7 @@ describe('singleTranslate()', function () {
 			signal: abortController.signal
 		};
 		abortController.abort();
-		await assert.rejects(singleTranslate('vertaler', {requestOptions}, this.initData), 'AbortError');
+		await assert.rejects(singleTranslate('vertaler', {requestOptions}), 'AbortError');
 	});
 
 	it('should reject on incorrect iso not forced', async () => {

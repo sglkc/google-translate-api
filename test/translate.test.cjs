@@ -2,6 +2,7 @@ const assert = require('assert/strict');
 const translate = require('../index.cjs');
 
 describe('translate()', function () {
+	this.retries(10);
 	it('should translate single input with forceBatch true', async () => {
 		const res = await translate('cat', {from: 'en', to: 'es'});
 

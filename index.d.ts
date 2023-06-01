@@ -13,7 +13,6 @@ declare class Translator {
 		opts?: googleTranslateApi.RequestOptions,
 	): googleTranslateApi.TranslationResponseStructure<Input>;
 	options: googleTranslateApi.RequestOptions;
-	initData: string;
 }
 
 declare function speak<Input extends googleTranslateApi.Input> (
