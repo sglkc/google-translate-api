@@ -186,6 +186,11 @@ describe('batchTranslate()', function () {
 			}
 		}
 
-		await assert.rejects(batchTranslate(sources, {from: 'es', to: 'en', rejectOnPartialFail: true}));
+		try {
+			const res = await batchTranslate(sources, {from: 'es', to: 'en', rejectOnPartialFail: true});
+			assert.deepEqual(res, targets);
+		} catch (e) {
+			assert(e.message.includes('Partial Translation Request Fail'), 'Fail error: ' + e.message);
+		}
 	});
 });
