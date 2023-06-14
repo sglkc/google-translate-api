@@ -188,7 +188,13 @@ describe('batchTranslate()', function () {
 
 		try {
 			const res = await batchTranslate(sources, {from: 'es', to: 'en', rejectOnPartialFail: true});
-			assert.deepEqual(res, targets);
+			const translations = res.map((translation) => {
+				if (translation === null) {
+					assert.fail('Set translation to `null` instead of rejecting on partial fail');
+				}
+				return translation.text;
+			});
+			assert.deepEqual(translations, targets);
 		} catch (e) {
 			assert(e.message.includes('Partial Translation Request Fail'), 'Fail error: ' + e.message);
 		}
