@@ -218,18 +218,6 @@ translate('Ik spreek Engels', {to: 'en', requestOptions: {
 ## Does it work from web page context?
 It can, sort of. `https://translate.google.com` does not provide [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) http headers allowing access from other domains.  However, this fork is written using Fetch and/or Axios, allowing contexts that don't request CORS access, such as a browser extension background script or React Native.
 
-## Usage with Expo and some other cases with babel
-You will need to install `@babel/plugin-proposal-private-methods` and add it to your babel plugins config like so:
-```js
-module.exports = function (api) {
-	api.cache(true);
-	return {
-		presets: ['babel-preset-expo'],
-		plugins: [['@babel/plugin-proposal-private-methods', { loose: true }]],
-	};
-};
-```
-
 
 ## API
 
