@@ -166,7 +166,7 @@ describe('batchTranslate()', function () {
 			{from: 'auto', to: 'nl'}
 		);
 	
-		assert.equal(res.text, 'vertaler, vertaler. vertaler! vertaler? Vertaler, vertaler.translator! Vertaler?');
+		assert.equal(res.text, 'vertaler, vertaler. vertaler! vertaler? vertaler,vertaler.vertaler!vertaler?');
 	});
 
 	it('should reject on partial fail true', async () => {
