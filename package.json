@@ -13,9 +13,10 @@
   ],
   "scripts": {
     "prepare": "git config core.hooksPath ./.hooks",
-    "lint": "eslint --ext .cjs,.mjs index.cjs lib test && tsd -f ./test",
+    "lint": "eslint --ext .cjs,.mjs index.cjs lib test tools && tsd -f ./test",
     "test": "mocha --parallel",
-    "release": "npm run lint && npm t && np --yolo --no-release-draft"
+    "release": "npm run lint && npm t && np --yolo --no-release-draft",
+    "update-langs": "node ./tools/updatelanguages.mjs"
   },
   "devDependencies": {
     "eslint": "^8.25.0",

@@ -3,6 +3,7 @@
 [![NPM version](https://img.shields.io/npm/v/google-translate-api-x.svg)](https://www.npmjs.com/package/google-translate-api-x)
 
 A **free** and **unlimited** API for Google Translate :dollar: :no_entry_sign: written with compatibility in mind, made to be crossplatform.
+Now with over 100 new languages supported!
 
 ## Features 
 
@@ -344,7 +345,6 @@ The options used by the requestFunction.  Must be in the style of [fetchinit](ht
 
 ## Related projects
 * [Translateer](https://github.com/Songkeys/Translateer) - uses Puppeteer to access Google Translate API.
-* [google-translate-api-languages-script](https://github.com/AidanWelch/google-translate-api-languages-script) - a simple script used to scrape languages for this project.
 
 ## License
 
