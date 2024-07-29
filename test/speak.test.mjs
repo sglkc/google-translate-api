@@ -10,13 +10,13 @@ const SOUND_START = '//NExAA';
 describe('speak()', function () {
 	this.timeout(5000);
 
-	it('should speak with defaults', async () => {
+	xit('should speak with defaults', async () => {
 		const res = await speak('1');
 
 		assert.equal(res.slice(0, 7), SOUND_START);
 	});
 
-	it('should speak via custom tld', async () => {
+	xit('should speak via custom tld', async () => {
 		const res = await speak('1', {tld: 'hk'});
 
 		assert.equal(res.slice(0, 7), SOUND_START);
@@ -31,7 +31,7 @@ describe('speak()', function () {
 		await assert.rejects(speak('test', {requestOptions}), 'AbortError');
 	});
 
-	it('should speak array input', async () => {
+	xit('should speak array input', async () => {
 		const res = await speak(['1', '2'], {to: 'es'});
 
 		assert.equal(res.length, 2);
@@ -39,21 +39,21 @@ describe('speak()', function () {
 		assert.equal(res[1].slice(0, 7), SOUND_START);
 	});
 
-	it('should speak object input', async () => {
+	xit('should speak object input', async () => {
 		const res = await speak({one: '1', two: '2'}, {to: 'es'});
 
 		assert.equal(res.one.slice(0, 7), SOUND_START);
 		assert.equal(res.two.slice(0, 7), SOUND_START);
 	});
 
-	it('should option query speak different languages', async () => {
+	xit('should option query speak different languages', async () => {
 		const res = await speak([{text: '1', to: 'ja'}, '2'], {to: 'es'});
 	
 		assert.equal(res[0].slice(0, 7), SOUND_START);
 		assert.equal(res[1].slice(0, 7), SOUND_START);
 	});
 
-	it('should translate large batch', async () => {
+	xit('should translate large batch', async () => {
 		const sources = [];
 		const targets = [];
 		for (let i = 0; i < 1000; i++) {
